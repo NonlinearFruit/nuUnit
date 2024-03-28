@@ -10,24 +10,24 @@ def main [--test-spec-module-name = "test-spec.nu"] {
 def discover-tests [testSpecModuleName] {
   let module = $testSpecModuleName | str replace '.nu' ''
   run-nushell [
-      --commands
-      $"use ($testSpecModuleName)
+    --commands
+    $"use ($testSpecModuleName)
 
-      scope modules
-      | where name == '($module)'
-      | get commands
-      | flatten
-      | where name =~ '^test'
-      | get name
-      | enumerate
-      | each {|it|
-        {
-          id: \($it.index + 1)
-          name: $it.item
-          exec: $'use ($testSpecModuleName) *; try {\($it.item)} catch {|err| print -e $err.debug; exit 1}'
-        }
+    scope modules
+    | where name == '($module)'
+    | get commands
+    | flatten
+    | where name =~ '^test'
+    | get name
+    | enumerate
+    | each {|it|
+      {
+        id: \($it.index + 1)
+        name: $it.item
+        exec: $'use ($testSpecModuleName) *; try {\($it.item)} catch {|err| print -e $err.debug; exit 1}'
       }
-      | to nuon"
+    }
+    | to nuon"
   ]
   | from nuon
 }
@@ -36,10 +36,10 @@ def run-tests [] {
   $in
   | par-each {|test|
     do {
-        run-nushell [
-            --commands
-            $test.exec
-        ]
+      run-nushell [
+        --commands
+        $test.exec
+      ]
     }
     | complete
     | insert id $test.id
