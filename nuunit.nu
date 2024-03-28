@@ -1,29 +1,33 @@
-def main [] {
-  discover-tests
+def main [--test-spec-module-name = "test-spec.nu"] {
+  if (not ($test_spec_module_name | path exists)) {
+    return $"Invalid test spec module: ($test_spec_module_name)"
+  }
+  discover-tests $test_spec_module_name
   | run-tests
   | output-tests
 }
 
-def discover-tests [] {
+def discover-tests [testSpecModuleName] {
+  let module = $testSpecModuleName | str replace '.nu' ''
   run-nushell [
       --commands
-      'use test-spec.nu
+      $"use ($testSpecModuleName)
 
       scope modules
-      | where name == "test-spec"
+      | where name == '($module)'
       | get commands
       | flatten
-      | where name =~ "^test"
+      | where name =~ '^test'
       | get name
       | enumerate
       | each {|it|
         {
-          id: ($it.index + 1)
+          id: \($it.index + 1)
           name: $it.item
-          exec: $"use test-spec.nu; try {test-spec ($it.item)} catch {|err| print -e $err.msg; exit 1}"
+          exec: $'use ($testSpecModuleName) *; try {\($it.item)} catch {|err| print -e $err.debug; exit 1}'
         }
       }
-      | to nuon'
+      | to nuon"
   ]
   | from nuon
 }
