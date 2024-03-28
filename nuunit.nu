@@ -1,17 +1,20 @@
-def main [--test-spec-module-name = "test-spec.nu"] {
+def main [
+  --test-spec-module-name = "test-spec.nu"
+] {
   if (not ($test_spec_module_name | path exists)) {
     return $"Invalid test spec module: ($test_spec_module_name)"
   }
-  discover-tests $test_spec_module_name
+  let module = $test_spec_module_name | str replace '.nu' ''
+  let importScript = $"use ($test_spec_module_name) *"
+  discover-tests $module $importScript
   | run-tests
   | output-tests
 }
 
-def discover-tests [testSpecModuleName] {
-  let module = $testSpecModuleName | str replace '.nu' ''
+def discover-tests [module testImportScript] {
   run-nushell [
     --commands
-    $"use ($testSpecModuleName)
+    $"($testImportScript)
 
     scope modules
     | where name == '($module)'
@@ -24,7 +27,7 @@ def discover-tests [testSpecModuleName] {
       {
         id: \($it.index + 1)
         name: $it.item
-        exec: $'use ($testSpecModuleName) *; try {\($it.item)} catch {|err| print -e $err.debug; exit 1}'
+        exec: $'($testImportScript); try {\($it.item)} catch {|err| print -e $err.debug; exit 1}'
       }
     }
     | to nuon"
