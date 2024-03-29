@@ -1,14 +1,25 @@
 def main [
   --test-spec-module-name = "test-spec.nu"
+  --test-spec-module-script:string
+  --as-json
 ] {
-  if (not ($test_spec_module_name | path exists)) {
+  if (not ($test_spec_module_name | path exists) and ($test_spec_module_script | is-empty)) {
     return $"Invalid test spec module: ($test_spec_module_name)"
   }
   let module = $test_spec_module_name | str replace '.nu' ''
-  let importScript = $"use ($test_spec_module_name) *"
-  discover-tests $module $importScript
+  let importScript = $test_spec_module_script | default $"use ($test_spec_module_name) *"
+  let testResults = discover-tests $module $importScript
   | run-tests
-  | output-tests
+
+  $testResults
+  | output-tests $as_json
+  | print
+
+  $testResults
+  | get exit_code
+  | sort
+  | first
+  | exit $in
 }
 
 def discover-tests [module testImportScript] {
@@ -27,7 +38,13 @@ def discover-tests [module testImportScript] {
       {
         id: \($it.index + 1)
         name: $it.item
-        exec: $'($testImportScript); try {\($it.item)} catch {|err| print -e $err.debug; exit 1}'
+        exec: $'($testImportScript)
+                try {
+                  \($it.item)
+                } catch {|err|
+                  print -e $err.debug
+                  exit 1
+                }'
       }
     }
     | to nuon"
@@ -50,8 +67,12 @@ def run-tests [] {
   }
 }
 
-def output-tests [] {
-  $in
+def output-tests [asJson] {
+  let tests = $in
+  if ($asJson) {
+    return ($tests | to json)
+  }
+  $tests
   | each {|testResult|
     if $testResult.exit_code == 0 {
       $"ok ($testResult.id) - ($testResult.name)"
