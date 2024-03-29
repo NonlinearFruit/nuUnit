@@ -18,7 +18,8 @@ def main [
   $testResults
   | get exit_code
   | sort
-  | first
+  | get -i 0
+  | default 0
   | exit $in
 }
 
