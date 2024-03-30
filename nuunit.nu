@@ -71,9 +71,14 @@ def run-tests [] {
 def output-tests [asJson] {
   let tests = $in
   if ($asJson) {
-    return ($tests | to json)
+    $tests | to json
+  } else {
+    $tests | to tap
   }
-  $tests
+}
+
+def "to tap" [] {
+  $in
   | each {|testResult|
     if $testResult.exit_code == 0 {
       $"ok ($testResult.id) - ($testResult.name)"
