@@ -1,13 +1,12 @@
 def main [
   --test-spec-module-name = "test-spec.nu"
-  --test-spec-module-script:string
   --as-json
 ] {
-  if (not ($test_spec_module_name | path exists) and ($test_spec_module_script | is-empty)) {
+  if (not ($test_spec_module_name | path exists)) {
     return $"Invalid test spec module: ($test_spec_module_name)"
   }
-  let module = $test_spec_module_name | str replace '.nu' ''
-  let importScript = $test_spec_module_script | default $"use ($test_spec_module_name) *"
+  let module = $test_spec_module_name | split row '/' | last | str replace '.nu' ''
+  let importScript = $"use ($test_spec_module_name) *"
   let testResults = discover-tests $module $importScript
   | run-tests
 

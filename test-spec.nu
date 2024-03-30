@@ -7,70 +7,66 @@ export def "test handles when spec does not exist" [] {
 }
 
 export def "test exit with error when test errors" [] {
-  let specScript = "
-    export module test {
-      export def test_that_fails [] { exit 400 }
-    }
-  "
+  use tests/test-spec-that-errs.nu "verify json results"
+  let specFile = "tests/test-spec-that-errs.nu"
+
   do {
-    ^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name "test" --test-spec-module-script $specScript
+    ^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile
   }
   | complete
   | assert not equal 0 ($in.exit_code)
 }
 
-export def "test handles when no tests" [] {
-  let specScript = "
-    export module test {
-    }
-    use test *
-  "
-  (^$nu.current-exe --no-config-file nuunit.nu
-    --test-spec-module-name "test"
-    --test-spec-module-script $specScript
-    --as-json)
+export def "test when there are no tests everything still works" [] {
+  use tests/test-spec-with-zero-tests.nu "verify json results"
+  let specFile = "tests/test-spec-with-zero-tests.nu"
+
+  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
   | from json
-  | length
-  | assert equal 0 $in
+  | verify json results
 }
 
-export def "test runs tests from spec script" [] {
-  let specScript = "
-    export module test {
-      export def test_the_stuff [] {}
-      export def test_the_other [] {}
-    }
-    use test *
-  "
-  (^$nu.current-exe --no-config-file nuunit.nu
-    --test-spec-module-name "test"
-    --test-spec-module-script $specScript
-    --as-json)
+export def "test when there is one test everything still works" [] {
+  use tests/test-spec-with-one-test.nu "verify json results"
+  let specFile = "tests/test-spec-with-one-test.nu"
+
+  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
   | from json
-  | length
-  | assert equal 2 $in
+  | verify json results
+}
+
+export def "test when there are two tests everything still works" [] {
+  use tests/test-spec-with-two-tests.nu "verify json results"
+  let specFile = "tests/test-spec-with-two-tests.nu"
+
+  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
+  | from json
+  | verify json results
 }
 
 export def "test when test errors runner keeps chugging" [] {
-  let specScript = "
-    export module test {
-      export def test_the_stuff [] {}
-    }
-    use test *
-  "
-  (^$nu.current-exe --no-config-file nuunit.nu
-    --test-spec-module-name "test"
-    --test-spec-module-script $specScript
-    --as-json)
-  | print
+  use tests/test-spec-that-errs.nu "verify json results"
+  let specFile = "tests/test-spec-that-errs.nu"
+
+  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
+  | from json
+  | verify json results
 }
 
-export def "not starting with test means the command will not run" [] {
-  "why would you run this?"
-  exit 1
+export def "test when exported command does not match pattern it is not included" [] {
+  use tests/test-spec-with-exported-commands-that-are-not-tests.nu "verify json results"
+  let specFile = "tests/test-spec-with-exported-commands-that-are-not-tests.nu"
+
+  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
+  | from json
+  | verify json results
 }
 
-def "test private commands are not magically ran" [] {
-  "why would you run this?"
-  exit 1
+export def "test private commands that look likes tests are not included" [] {
+  use tests/test-spec-with-private-commands-that-look-like-tests.nu "verify json results"
+  let specFile = "tests/test-spec-with-private-commands-that-look-like-tests.nu"
+
+  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
+  | from json
+  | verify json results
 }
