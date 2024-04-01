@@ -65,6 +65,14 @@ export def "test private commands that look likes tests are not included" [] {
   | verify json results
 }
 
+export def "test output is tap compliant" [] {
+  use tests/test-spec-outputs-tap.nu "verify tap results"
+  let specFile = "tests/test-spec-outputs-tap.nu"
+
+  ^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile
+  | verify tap results
+}
+
 def run-test-spec [specFile] {
   (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
   | from json
