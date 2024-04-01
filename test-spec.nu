@@ -21,8 +21,7 @@ export def "test when there are no tests everything still works" [] {
   use tests/test-spec-with-zero-tests.nu "verify json results"
   let specFile = "tests/test-spec-with-zero-tests.nu"
 
-  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
-  | from json
+  run-test-spec $specFile
   | verify json results
 }
 
@@ -30,8 +29,7 @@ export def "test when there is one test everything still works" [] {
   use tests/test-spec-with-one-test.nu "verify json results"
   let specFile = "tests/test-spec-with-one-test.nu"
 
-  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
-  | from json
+  run-test-spec $specFile
   | verify json results
 }
 
@@ -39,8 +37,7 @@ export def "test when there are two tests everything still works" [] {
   use tests/test-spec-with-two-tests.nu "verify json results"
   let specFile = "tests/test-spec-with-two-tests.nu"
 
-  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
-  | from json
+  run-test-spec $specFile
   | verify json results
 }
 
@@ -48,8 +45,7 @@ export def "test when test errors runner keeps chugging" [] {
   use tests/test-spec-that-errs.nu "verify json results"
   let specFile = "tests/test-spec-that-errs.nu"
 
-  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
-  | from json
+  run-test-spec $specFile
   | verify json results
 }
 
@@ -57,8 +53,7 @@ export def "test when exported command does not match pattern it is not included
   use tests/test-spec-with-exported-commands-that-are-not-tests.nu "verify json results"
   let specFile = "tests/test-spec-with-exported-commands-that-are-not-tests.nu"
 
-  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
-  | from json
+  run-test-spec $specFile
   | verify json results
 }
 
@@ -66,7 +61,11 @@ export def "test private commands that look likes tests are not included" [] {
   use tests/test-spec-with-private-commands-that-look-like-tests.nu "verify json results"
   let specFile = "tests/test-spec-with-private-commands-that-look-like-tests.nu"
 
+  run-test-spec $specFile
+  | verify json results
+}
+
+def run-test-spec [specFile] {
   (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
   | from json
-  | verify json results
 }
