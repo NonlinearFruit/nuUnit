@@ -1,4 +1,6 @@
-def main [
+#!/usr/bin/env nu
+
+export def main [
   --test-spec-module-name = "test-spec.nu"
   --as-json
 ] {
@@ -33,7 +35,7 @@ def run-test-discoverer [module testImportScript] {
   | from nuon
 }
 
-def discover-tests [module testImportScript] {
+export def discover-tests [module testImportScript] {
   scope modules
   | where name == $module
   | get commands

@@ -73,6 +73,31 @@ export def "test output is tap compliant" [] {
   | verify tap results
 }
 
+export def "test can run via nu cli" [] {
+  use tests/generic-test-spec.nu "verify json results"
+  let specFile = "tests/generic-test-spec.nu"
+
+  (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
+  | verify json results
+}
+
+export def "test can run via nu script" [] {
+  use tests/generic-test-spec.nu "verify json results"
+  let specFile = "tests/generic-test-spec.nu"
+  let script = $"use nuunit.nu *; nuunit --test-spec-module-name ($specFile) --as-json"
+
+  ^$nu.current-exe --no-config-file -c $script
+  | verify json results
+}
+
+export def "test can run via shebang" [] {
+  use tests/generic-test-spec.nu "verify json results"
+  let specFile = "tests/generic-test-spec.nu"
+
+  ^./nuunit.nu  --test-spec-module-name ($specFile) --as-json
+  | verify json results
+}
+
 def run-test-spec [specFile] {
   (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
   | from json
