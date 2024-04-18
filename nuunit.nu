@@ -47,18 +47,23 @@ export def discover-tests [module testImportScript] {
     {
       id: ($it.index + 1)
       name: $it.item
-      exec: $'($testImportScript)
+      exec: $"($testImportScript)
               try {
-                if (scope commands | where name == "before each" | is-empty) {
+                if \(scope commands | where name == 'before each' | is-empty) {
                   null
                 } else {
                   before each
                 }
                 | ($it.item)
+                | if \(scope commands | where name == 'after each' | is-empty) {
+                  null
+                } else {
+                  after each
+                }
               } catch {|err|
                 print -e $err.debug
                 exit 1
-              }'
+              }"
     }
   }
 }
