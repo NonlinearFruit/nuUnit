@@ -98,6 +98,14 @@ export def "test can run via shebang" [] {
   | verify json results
 }
 
+export def "test that the before each passes context to a test" [] {
+  use tests/test-spec-with-before-each.nu "verify json results"
+  let specFile = "tests/test-spec-with-before-each.nu"
+
+  run-test-spec $specFile
+  | verify json results
+}
+
 def run-test-spec [specFile] {
   (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
   | from json

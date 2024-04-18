@@ -49,7 +49,12 @@ export def discover-tests [module testImportScript] {
       name: $it.item
       exec: $'($testImportScript)
               try {
-                ($it.item)
+                if (scope commands | where name == "before each" | is-empty) {
+                  null
+                } else {
+                  before each
+                }
+                | ($it.item)
               } catch {|err|
                 print -e $err.debug
                 exit 1
