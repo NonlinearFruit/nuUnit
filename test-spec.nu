@@ -114,6 +114,18 @@ export def "test that the after each passes context to a test" [] {
   | verify json results
 }
 
+export def "test that importing all nuunit commands is gracefully handled" [] {
+  use std assert
+  let specFile = "tests/generic-test-spec.nu"
+
+  let results = do {
+    ^$nu.current-exe --no-config-file -c $'use nuunit.nu; nuunit --test-spec-module-name ($specFile)'
+  }
+  | complete
+
+  assert (0 == $results.exit_code)
+}
+
 def run-test-spec [specFile] {
   (^$nu.current-exe --no-config-file nuunit.nu --test-spec-module-name $specFile --as-json)
   | from json

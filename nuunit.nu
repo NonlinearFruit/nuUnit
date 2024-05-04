@@ -4,7 +4,7 @@ export def main [
   --test-spec-module-name = "test-spec.nu"
   --as-json
 ] {
-  if (not ($test_spec_module_name | path exists)) {
+  if (is-not-valid-test-spec $test_spec_module_name) {
     return $"Invalid test spec module: ($test_spec_module_name)"
   }
   let module = $test_spec_module_name | split row '/' | last | str replace '.nu' ''
@@ -24,15 +24,28 @@ export def main [
   | exit $in
 }
 
+def is-not-valid-test-spec [spec] {
+  not ($spec | path exists)
+}
+
 def run-test-discoverer [module testImportScript] {
   run-nushell [
     --commands
     $"($testImportScript)
-    (view source discover-tests)
+    (inline-source-code discover-tests)
     discover-tests '($module)' '($testImportScript)'
     | to nuon"
   ]
   | from nuon
+}
+
+def inline-source-code [command] {
+  try {
+    view source $command
+  } catch {
+    view source $"nuunit ($command)"
+    | str replace 'nuunit ' ''
+  }
 }
 
 export def discover-tests [module testImportScript] {
