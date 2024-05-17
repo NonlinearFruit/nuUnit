@@ -7,8 +7,7 @@ export def "verify tap results" [] {
   let tap = "TAP version 14
 1..2
 ok 1 - test 1
-ok 2 - test 2
-"
+ok 2 - test 2"
   assert equal $tap $results
 }
 
