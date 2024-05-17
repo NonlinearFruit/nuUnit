@@ -7,7 +7,6 @@ export def "test handles when spec does not exist" [] {
 }
 
 export def "test exit with error when test errors" [] {
-  use tests/test-spec-that-errs.nu "verify json results"
   let specFile = "tests/test-spec-that-errs.nu"
 
   do {

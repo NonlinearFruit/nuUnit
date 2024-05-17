@@ -18,7 +18,7 @@ export def main [
 
   $testResults
   | get exit_code
-  | sort
+  | sort --reverse
   | get -i 0
   | default 0
   | exit $in
