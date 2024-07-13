@@ -3,12 +3,8 @@ name: test
 on: push
 
 jobs:
-  basic-usage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4.0.0
-      - uses: hustcer/setup-nu@main
-        with:
-          version: "*"
-      - run: |
-          nu nuunit.nu
+  nushell-tests:
+    uses: NonlinearFruit/nuUnit/.github/workflows/nushell-tests.yml@master
+    with:
+      nushell_version: "*"
+      nuunit_version: "master"

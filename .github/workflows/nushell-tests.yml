@@ -1,0 +1,23 @@
+name: Check nushell scripts
+
+on:
+  workflow_call:
+    inputs:
+      nushell_version:
+        type: string
+        default: "*"
+      nuunit_version:
+        type: string
+        default: "master"
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.0.0
+      - uses: hustcer/setup-nu@main
+        with:
+          version: ${{ inputs.nushell_version }}
+      - run: |
+          nu -c 'http get https://raw.githubusercontent.com/NonlinearFruit/nuUnit/${{ inputs.nuunit_version }}/nuunit.nu | save -f nuunit.nu'
+          nu nuunit.nu
